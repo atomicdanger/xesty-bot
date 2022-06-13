@@ -25,7 +25,7 @@ class VM(commands.Cog):
         whitelist=[535490443681595392]
         if before.channel and before.channel.id == 979681300220903425:
             return
-        if before:
+        if before.channel:
             channel = before.channel
         else:
             channel = after.channel
