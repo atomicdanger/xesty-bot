@@ -23,7 +23,9 @@ class VM(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self,member,before,after):
         whitelist=[535490443681595392]
-        if before.channel and before.channel.id == 979681300220903425:
+        # jvc_id= 979681300220903425
+        jvc_id=985847158949429258
+        if before.channel and before.channel.id == jvc_id:
             return
         if before.channel:
             channel = before.channel
@@ -46,9 +48,9 @@ class VM(commands.Cog):
                 if c["lock"] or c["ghost"] and not member.id in c["whitelist"]:
                     await member.move_to(before.channel)
                     return
-        if after.channel and after.channel.id == 979681300220903425:
+        if after.channel and after.channel.id == jvc_id:
             data = await self.client.vm.find_one({"_id":member.id})
-            jtc = await self.client.fetch_channel(979681300220903425)
+            jtc = await self.client.fetch_channel(jvc_id)
             overwrites = {}
             overwrite = discord.PermissionOverwrite()
             overwrite.view_channel= True
@@ -856,8 +858,6 @@ class VM(commands.Cog):
             embed.description+=f"{emoji} {desc[key]}\n"
             view.add_item(button)
         await ctx.send(embed=embed,view=view)
-        embed.description= "[Unban](https://discord.gg/xesty)"
-        await ctx.send(embed=embed)
         
         
         
