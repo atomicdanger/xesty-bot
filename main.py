@@ -2,10 +2,10 @@ import os
 # os.system("pip install -U git+https://github.com/Rapptz/discord.py")
 import discord
 from discord.ext import commands
-from waitress import serve
-from threading import Thread
-from flask import Flask
-import os
+# from waitress import serve
+# from threading import Thread
+# from flask import Flask
+# import os
 from motor import motor_asyncio
 from discord import app_commands
 from discord.ui import Button, View, TextInput, Modal
@@ -13,24 +13,24 @@ import datetime
 
 #
 
-app = Flask('')
+# app = Flask('')
 
 
-@app.route('/')
-def main():
-	return "Your Bot Is Ready"
+# @app.route('/')
+# def main():
+# 	return "Your Bot Is Ready"
 
 
-def run():
-	serve(app, host="0.0.0.0", port=8080)
+# def run():
+# 	serve(app, host="0.0.0.0", port=8080)
 
 
-def keep_alive():
-	server = Thread(target=run)
-	server.start()
+# def keep_alive():
+# 	server = Thread(target=run)
+# 	server.start()
 
 
-keep_alive()
+# keep_alive()
 
 # MY_GUILD = discord.Object(id=910395389172121600)
 intents = discord.Intents.all()
