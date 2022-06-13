@@ -23,8 +23,7 @@ class VM(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self,member,before,after):
         whitelist=[535490443681595392]
-        # jvc_id= 979681300220903425
-        jvc_id=985847158949429258
+        jvc_id= 979681300220903425
         if before.channel and before.channel.id == jvc_id:
             return
         if before.channel:
@@ -862,6 +861,7 @@ class VM(commands.Cog):
         
         
     @commands.command()
+    @commands.is_owner()
     async def delete_all(self,ctx):
         a=await self.client.vm.delete_many({})
         await ctx.send(a)
