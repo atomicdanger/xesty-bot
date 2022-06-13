@@ -4,3 +4,4 @@ waitress==2.1.1
 discord.py @ git+https://github.com/Rapptz/discord.py
 dnspython==2.0.0
 requests==2.27.1
+Pillow
