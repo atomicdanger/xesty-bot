@@ -1,6 +1,5 @@
 import discord, datetime, time, math, requests
 from discord.ext import commands
-from Context import ComponentContext
 from discord.utils import get
 from discord.ui import Button, View, TextInput, Modal, Select
 
@@ -9,9 +8,6 @@ import os
 
 class VM(commands.Cog):
     
-    token = os.environ['TOKEN']
-
-    header = {"Authorization": f"Bot {token}"}
     def __init__(self, bot):
         self.client = bot
         self.methods = {"vmrename":self.rename,"vmlock":self.lock,"vmunlock":self.unlock,"vmghost":self.ghost,"vmunghost":self.unghost,

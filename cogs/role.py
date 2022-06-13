@@ -7,10 +7,6 @@ from discord.ui import Button, View, TextInput, Modal, Select
 import json
 
 class Role(commands.Cog):
-    token = os.environ['TOKEN']
-    application_id = "865841283343450122"
-    api_url = f"https://discord.com/api/v9/applications/{application_id}/commands"
-    header = {"Authorization": f"Bot {token}"}
     def __init__(self, client):
         self.client = client
         self.roles=[924928169717411870,910852917131632641,958966114229051412]

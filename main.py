@@ -1,5 +1,5 @@
 import os
-os.system("pip install -U git+https://github.com/Rapptz/discord.py")
+# os.system("pip install -U git+https://github.com/Rapptz/discord.py")
 import discord
 from discord.ext import commands
 from waitress import serve
