@@ -404,7 +404,6 @@ class VM(commands.Cog):
                     continue
                 bans.append(member.id)
             view.clear_items()
-            view.clear_items()
             view.add_item(b_bans)
             if len(bans)>0:
                 embed.description = f"**Banned** `0` members\n**Reason:\n**{reason}\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
@@ -453,29 +452,29 @@ class VM(commands.Cog):
                 embed.set_footer(text=f"1/{pages}")
                 previous = Button(label="Previous", custom_id=f"vmban_prev",style=discord.ButtonStyle.grey,disabled=True)
                 next = Button(label="Next", custom_id=f"vmban_next",style=discord.ButtonStyle.grey)
-                view = View(timeout=120)
-                view.add_item(previous)
-                view.add_item(next)
+                view1 = View(timeout=120)
+                view1.add_item(previous)
+                view1.add_item(next)
         
                 async def previous_callback(irr:discord.Interaction):
                     page = int(irr.message.embeds[0].footer.text.split("/")[0])
-                    view.children[1].disabled=False
+                    view1.children[1].disabled=False
                     if page==2:
-                        view.children[0].disabled=True
+                        view1.children[0].disabled=True
                     embedp,pagesp = await self.page(page-1,d)
                     embedp.set_footer(text=f"{page-1}/{pagesp}")
                     embedp.title ="Bans"
-                    await irr.response.edit_message(embed=embedp,view=view)
+                    await irr.response.edit_message(embed=embedp,view=view1)
                 async def next_callback(irr:discord.Interaction):
                     page = int(irr.message.embeds[0].footer.text.split("/")[0])
                     
-                    view.children[0].disabled=False
+                    view1.children[0].disabled=False
                     if pages-1 ==page:
-                        view.children[1].disabled=True
+                        view1.children[1].disabled=True
                     embedn,pagesp = await self.page(page+1,d)
                     embedn.set_footer(text=f"{page+1}/{pagesp}")
                     embedn.title ="Bans"
-                    await irr.response.edit_message(embed=embedn,view=view)
+                    await irr.response.edit_message(embed=embedn,view=view1)
                 previous.callback= previous_callback
                 next.callback= next_callback
                 
