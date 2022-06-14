@@ -479,7 +479,9 @@ class VM(commands.Cog):
                 view.clear_items()
                 await ir.response.edit_message(embed=embed,view=view)
         if len(user.voice.channel.members)>1 and len(user.voice.channel.members)<=25:
+
             select = Select(custom_id="select_vmban",placeholder="Select a member to ban from the VC",max_values=len(user.voice.channel.members)-1)
+
             view.add_item(select)
             for member in user.voice.channel.members[:25]:
                 if not member.id == data["_id"]:
@@ -719,7 +721,7 @@ class VM(commands.Cog):
             return
         embed=discord.Embed(color=3092790,title="Whitelist",description="[`Whitelists`](https://discord.gg/xesty) an user and lets em join even if the channels locked or ghosted.\n\n**Usage:**\n・[`Add`](https://discord.gg/xesty): Click the button to whitelist a member\n・[`Remove`](https://discord.gg/xesty): Click the button to unwhitelist a member\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members")
         view=View()
-        add=Button(label="Add",custom_id="vm_whitelist_add")
+        add=Button(label="Add",custom_="vm_whitelist_add")
         remove=Button(label="Remove",custom_id="vm_whitelist_remove")
         wlist=Button(label="List",custom_id="vmwhitelists")
         view.add_item(add)
