@@ -2,7 +2,7 @@ import discord, datetime, time, math, requests
 from discord.ext import commands
 from discord.utils import get
 from discord.ui import Button, View, TextInput, Modal, Select
-
+import asyncio
 # from Messages import ActionRow, Button, MenuOption,SelectMenu
 import os
 
@@ -24,31 +24,77 @@ class VM(commands.Cog):
     async def on_voice_state_update(self,member,before,after):
         whitelist=[535490443681595392]
         jvc_id= 979681300220903425
+        b=None
+        a=None
         if before.channel and before.channel.id == jvc_id:
             return
         if before.channel:
-            channel = before.channel
+            b_channel = before.channel.id
+            b = await self.client.vm.find_one({"channel":b_channel.id})    
         else:
-            channel = after.channel
-        c = await self.client.vm.find_one({"channel":channel.id})
-        if before.channel: 
-            if c and before.channel.id == c["channel"]:
+            a_channel = after.channel.id
+            a = await self.client.vm.find_one({"channel":a_channel.id})     
+        if b and before.channel.id == b["channel"]:
+            if not b["boost"]:
                 if len(before.channel.members) == 0:
                     await before.channel.delete(reason="Empty Vc")
-                    c["channel"]=None
-                    await self.client.vm.replace_one({"_id":c["_id"]},c)
-        if c and after.channel ==c["channel"]:
-            if member.id != c["_id"]:
+                    b["channel"]=None
+                    await self.client.vm.replace_one({"_id":b["_id"]},b)
+            else:
+                cooldown = b["cooldown"]["last"]+30
+                if cooldown >time.time():
+                    t=cooldown-time.time()
+                    await asyncio.sleep(t)
+                    before.channel = await member.guild.fetch_channel(before.channel.id)
+                if len(before.channel.members) == 0:
+                    await before.channel.delete(reason="Empty Vc")
+                    b["channel"]=None
+                    b["boost"]=False
+                    await self.client.vm.replace_one({"_id":b["_id"]},b)
+                
+        if a and after.channel.id ==a["channel"]:
+            if member.id != a["_id"]:
                 if member.id in whitelist:
                     return
-                if member.id in c["ban"]:
+                if member.id in a["ban"]:
                     await member.move_to(before.channel)
                     return
-                if c["lock"] or c["ghost"] and not member.id in c["whitelist"]:
+                if a["lock"] or a["ghost"] and not member.id in a["whitelist"]:
                     await member.move_to(before.channel)
                     return
         if after.channel and after.channel.id == jvc_id:
+            booster=None
+            booster_c=None
             data = await self.client.vm.find_one({"_id":member.id})
+            if data:
+                if data["channel"]:
+                    return
+                cooldown = data["cooldown"]["last"]+30
+                if cooldown >time.time():
+                    if data["cooldown"]["warns"]==3:
+                        return
+                    data["cooldown"]["warns"]+=1
+                    if not member.premium_since:
+                        embed= discord.Embed(title="Cooldown",description=f"Wait <t:{cooldown}:R> before being able to make a new VC.\nBoost the server to avoid the cooldowns!")
+                        embed.set_author(name="Voice Master")
+                        try:
+                            await member.send(embed=embed)
+                        except:
+                            interface_c = member.guild.get_channel(979681423160147968)
+                            await interface_c.send(member.mention,delete_after=3)
+                            await interface_c.send(embed=embed,delete_after=3)
+                        await self.client.vm.replace_one({"_id":member.id},data,True)
+                    else:
+                        booster=True
+                    if data["cooldown"]["warns"]==3:
+                        ban_role= member.guild.get_role(2)
+                        await member.add_roles(ban_role)
+                        if not member.premium_since:
+                            await asyncio.sleep(300)
+                            await member.remove_roles(ban_role)
+                            return
+                        else:
+                            booster_c=True
             jtc = await self.client.fetch_channel(jvc_id)
             overwrites = {}
             overwrite = discord.PermissionOverwrite()
@@ -92,10 +138,18 @@ class VM(commands.Cog):
                 data["lock"]=None
                 data["ban"]=[]
                 data["whitelist"]=[]
+            data["boost"]=False
+            if not booster:
+                data["cooldown"]={"last":time.time(),"warns":0}
+            if booster_c:
+                data["boost"]=True
             new_vc = await member.guild.create_voice_channel(name=name,category=jtc.category,overwrites=overwrites)
             data["channel"]=new_vc.id
             await member.move_to(new_vc)
             await self.client.vm.replace_one({"_id":member.id},data,True)
+            if booster_c:
+                await asyncio.sleep(300)
+                await member.remove_roles(ban_role)
 
     async def rename(self,i):
         user= i.user
@@ -177,7 +231,7 @@ class VM(commands.Cog):
         view = View(timeout=10) 
         unlock = Button(label="Unlock",custom_id="vmunlock")
         view.add_item(unlock) 
-        embed = discord.Embed(color=3092790,description=f"**Locked the voice channel!**")
+        embed = discord.Embed(color=3092790,title="Lock",description=f"[`Locks`](https://discord.gg/xesty) the channel for everyone.\n**Locked** the voice channel!\n\n**Usage:**\n・[`Unlock`](https://discord.gg/xesty): Click the button to unlock the channel")
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         data["lock"]=True
         await self.client.vm.replace_one({"_id":user.id},data)
@@ -212,7 +266,7 @@ class VM(commands.Cog):
         view = View(timeout=10) 
         lock = Button(label="Lock",custom_id="vmlock")
         view.add_item(lock) 
-        embed = discord.Embed(color=3092790,description=f"**Unlocked the voice channel!**")
+        embed = discord.Embed(color=3092790,title="Unlock",description=f"[`Unlocks`](https://discord.gg/xesty) the channel and lets everyone join.\n**Unlocked** the voice channel!\n\n**Usage:**\n・[`Lock`](https://discord.gg/xesty): Click the button to lock the channel")
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         data["lock"]=None
         await self.client.vm.replace_one({"_id":user.id},data)
@@ -246,9 +300,10 @@ class VM(commands.Cog):
         overwrite.view_channel=False
         await user.voice.channel.set_permissions(user.guild.default_role,overwrite=overwrite)
         view = View(timeout=10) 
-        lock = Button(label="Unghost",custom_id="vmunghost")
+        lock = Button(label="Unhide",custom_id="vmunghost")
         view.add_item(lock) 
-        embed = discord.Embed(color=3092790,description=f"**The voice channel is invisible now!**")
+        embed = discord.Embed(color=3092790,title="Hide",description=f"[`Hides`](https://discord.gg/xesty) the channel from everyone.\n**Hid** the voice channel!\n\n**Usage:**\n・[`Unhide`](https://discord.gg/xesty): Click the button to unhide the channel")
+        
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         data["ghost"]=True
         await self.client.vm.replace_one({"_id":user.id},data)
@@ -280,9 +335,10 @@ class VM(commands.Cog):
         overwrite.view_channel=None
         await user.voice.channel.set_permissions(user.guild.default_role,overwrite=overwrite)
         view = View(timeout=10) 
-        lock = Button(label="Ghost",custom_id="vmghost")
+        lock = Button(label="Hide",custom_id="vmghost")
         view.add_item(lock) 
-        embed = discord.Embed(color=3092790,description=f"**The voice channel is visible now!**")
+        embed = discord.Embed(color=3092790,title="Unhide",description=f"[`Unhides`](https://discord.gg/xesty) the channel from everyone.\n**Unhid** the voice channel!\n\n**Usage:**\n・[`Hide`](https://discord.gg/xesty): Click the button to hide the channel")
+        
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         data["ghost"]=None #test now?
         await self.client.vm.replace_one({"_id":user.id},data)
@@ -312,7 +368,8 @@ class VM(commands.Cog):
             await i.response.send_message(embed=embed,ephemeral=True)
             return
         embed = discord.Embed(
-            description="Click the `Ban User` button to enter the member you wish to ban from the VC",
+            title="Ban",
+            description="[`Bans`](https://discord.gg/xesty) users from joining your channel even if its unlocked.\n\n**Usage:**\n・[`Ban User`](https://discord.gg/xesty): Click the button to enter the member you wish to ban from the VC",
             color=3092790
         )
         view=View()
@@ -333,24 +390,24 @@ class VM(commands.Cog):
             bans=[]
             reason=""
             for id in values:
-                if id in data["ban"]:
-                    reason="・Member already is banned\n"
-                    continue
                 member =await ban_member(id)
                 if not member:
                     reason="・Member not found\n"
+                    continue
+                if id in data["ban"]:
+                    reason="・Member already is banned\n"
                     continue
                 bans.append(member.id)
             view.clear_items()
             view.clear_items()
             view.add_items(b_bans)
             if len(bans)>0:
-                embed.description = f"**0** members were banned\n**Reason:\n**{reason} \nClick the `Bans` button to see all the bans."
+                embed.description = f"**Banned** `0` members\n**Reason:\n**{reason}\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
                 await ir.response.edit_message(embed=embed,view=view)
             else:
                 data["ban"].extend(bans)
                 await self.client.vm.replace_one({"_id":user.id},data)
-                embed.description = f"**{len(bans)}** members were banned\nClick the `Bans` button to see all the bans."
+                embed.description = f"**Banned** `{len(bans)}` members\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
                 await ir.response.edit_message(embed=embed,view=view)
         async def button_callback(ir): 
             modal = Modal(title="Ban")
@@ -361,20 +418,20 @@ class VM(commands.Cog):
                 view.clear_items()
                 view.add_item(b_bans)
                 if not member:
-                    embed.description = f"**0** members were banned\n**Reason:\n**・Member not found\nClick the `Bans` button to see all the bans."
-                    await irr.response.edit_message(embed=embed,view=view)
-                    return
-                if member.id in data["ban"]:
-                    embed.description = f"**0** members were banned\n**Reason:\n**・Member already is banned\nClick the `Bans` button to see all the bans."
+                    embed.description = f"**Banned** `0` members\n**Reason:\n**・Member not found\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
                     await irr.response.edit_message(embed=embed,view=view)
                     return
                 overwrite = user.voice.channel.overwrites_for(member)
                 overwrite.connect=False
                 await user.voice.channel.set_permissions(member,overwrite=overwrite)
+                if member.id in data["ban"]:
+                    embed.description = f"**Banned** `0` members\n**Reason:\n**・Member already is banned\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
+                    await irr.response.edit_message(embed=embed,view=view)
+                    return
                 data["ban"].append(member.id)
                 await self.client.vm.replace_one({"_id":user.id},data)
                 
-                embed.description = f"**Banned** {member.mention}\nClick the `Bans` button to see all the bans."
+                embed.description = f"**Banned** {member.mention}\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
                 await irr.response.edit_message(embed=embed,view=view)
             modal.on_submit=text_callback
             modal.add_item(text)
@@ -427,11 +484,11 @@ class VM(commands.Cog):
             for member in user.voice.channel.members[:25]:
                 if not member.id == data["_id"]:
                     select.add_option(label=f"{member.display_name}",value=member.id,description=str(member)) 
-            embed.description+="\n**OR**\nSelect an existing VC participant from the dropdown menu."
+            embed.description+="\n・[`DropDown Menu`](https://discord.gg/xesty): Select an existing VC participant to ban."
             select.callback=select_callback
         button.callback=button_callback
         b_bans.callback=list_callback
-        embed.description+="\nClick the `Bans` button to see all the bans."
+        embed.description+="\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         async def on_timeout():
             view.clear_items()
@@ -459,7 +516,8 @@ class VM(commands.Cog):
             await i.response.send_message(embed=embed,ephemeral=True)
             return
         embed = discord.Embed(
-            description="",
+            title="Ban",
+            description="[`Unbans`](https://discord.gg/xesty) users and lets em join your channel if its unlocked.\n\n**Usage:**\n",
             color=3092790
         )
         if len(data["ban"])==0:
@@ -478,7 +536,7 @@ class VM(commands.Cog):
             view.clear_items()
             view.add_items(b_bans)
             await self.client.vm.replace_one({"_id":user.id},data)
-            embed.description = f"**{len(data['values'])}** members were unbanned\nClick the `Bans` button to see all the bans."
+            embed.description = f"**Unbanned** `{len(data['values'])}` members\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
             await ir.response.edit_message(embed=embed,view=view)
         async def button_callback(ir): 
             modal = Modal(title="Unban")
@@ -492,11 +550,11 @@ class VM(commands.Cog):
                     try:
                         member = await self.client.fetch_user(int(x))
                     except:
-                        embed.description = f"**0** members were unbanned\n**Reason:\n**・Member not found\nClick the `Bans` button to see all the bans."
+                        embed.description = f"**Unbanned** `0` members\n**Reason:\n**・Member not found\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
                         await irr.response.edit_message(embed=embed,view=view)
                         return
                 if not member.id in data["ban"]:
-                    embed.description = f"**0** members were unbanned\n**Reason:\n**・The member was never banned\nClick the `Bans` button to see all the bans."
+                    embed.description = f"**Unbanned** `0` members\n**Reason:\n**・Member was never banned\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
                     await irr.response.edit_message(embed=embed,view=view)
                     return
                 if type(member)== discord.Member:
@@ -504,7 +562,7 @@ class VM(commands.Cog):
                     overwrite.connect=None
                     await user.voice.channel.set_permissions(member,overwrite=overwrite)
                 data["ban"].remove(member.id)
-                embed.description = f"**Unbanned** {member.mention}\nClick the `Bans` button to see all the bans."
+                embed.description = f"**Unbanned** {member.mention}\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
                 await irr.response.edit_message(embed=embed,view=view)
                 await self.client.vm.replace_one({"_id":user.id},data)
                 
@@ -562,17 +620,17 @@ class VM(commands.Cog):
                     select.add_option(label=f"{member.display_name}",value=member.id,description=str(member))
                 except:
                     pass
-            embed.description+="Select a member to unban from the dropdown menu."
+            embed.description+="・[`DropDown Menu`](https://discord.gg/xesty): Select a member to unban from the dropdown menu.\n"
             select.callback=select_callback
         else:
             button = Button(label="Unban User",custom_id="select_button_vmunban",style=discord.ButtonStyle.primary)
             view.add_item(button)
-            embed.description ="Click the `Unban User` button to enter the member you wish to ban from the VC"
+            embed.description ="・[`Unban User`](https://discord.gg/xesty): Click the button to enter the member you wish to ban from the VC\n"
             button.callback=button_callback
         b_bans = Button(label="Bans",custom_id="vmbans")
         view.add_item(b_bans)
         b_bans.callback=list_callback
-        embed.description+="\nClick the `Bans` button to see all the bans."
+        embed.description+="・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         async def on_timeout():
             view.clear_items()
@@ -632,7 +690,8 @@ class VM(commands.Cog):
         view.add_item(select)
         
         embed = discord.Embed(
-            description="Select an activity to start from the menu",color=3092790)
+            title="Activity",
+            description="[`Starts`] an activity to play with your friends in the VC (Desktop Only).\n\n**Usage:**\n・[`Dropdown Menu`](https://discord.gg/xesty): Select an activity to start from the menu",color=3092790)
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         async def on_timeout():
             view.clear_items()
@@ -658,7 +717,7 @@ class VM(commands.Cog):
             embed = discord.Embed(color=3092790,description=f"**Only owner of the voice channel ({owner.mention}) can access the feature**")
             await i.response.send_message(embed=embed,ephemeral=True)
             return
-        embed=discord.Embed(color=3092790,description="Click **Add** button to whitelist a member\nClick **Remove** button to unwhitelist a member\nClick **List** to see all the whitelisted members")
+        embed=discord.Embed(color=3092790,title="Whitelist",description="[`Whitelists] an user and lets em join even if the channels locked or ghosted.\n\n**Usage:**\n・[`Add`](https://discord.gg/xesty): Click the button to whitelist a member\n・[`Remove`](https://discord.gg/xesty): Click the button to unwhitelist a member\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members")
         view=View()
         add=Button(label="Add",custom_="vm_whitelist_add")
         remove=Button(label="Remove",custom_="vm_whitelist_remove")
@@ -675,22 +734,22 @@ class VM(commands.Cog):
                 view.add_item(list)
                 member = user.guild.get_member_named(x) or user.guild.get_member(int(x))
                 if not member:
-                    embed.description = f"**0** members were whitelisted\n**Reason:\n**・Member not found\nClick the `List` button to see all the whitelisted members."
+                    embed.description = f"**Whitelisted** `0` member\n**Reason:\n**・Member not found\n\n**Usage:**\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members."
                     await ir.response.edit_message(embed=embed,view=view)
                     return
-                if member.id in data["whitelist"]:
-                    embed.description = f"**0** members were whitelisted\n**Reason:\n**・The member already is whitelisted\nClick the `List` button to see all the whitelisted members."
-                    await ir.response.edit_message(embed=embed,view=view)
-                    return
-                
                 overwrite = user.voice.channel.overwrites_for(member)
                 overwrite.connect=True
                 overwrite.view_channel=True
                 await user.voice.channel.set_permissions(member,overwrite=overwrite)
-                data["whitelist"].remove(member.id)
+                if member.id in data["whitelist"]:
+                    embed.description = f"**Whitelisted** `0` members\n**Reason:\n**・The member already is whitelisted\n\n**Usage:**\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members."
+                    await ir.response.edit_message(embed=embed,view=view)
+                    return
+                
+                data["whitelist"].append(member.id)
                 await self.client.vm.replace_one({"_id":user.id},data)
                 
-                embed.description = f"**Whitelisted** {member.mention}\nClick the `List` button to see all the whitelisted members."
+                embed.description = f"**Whitelisted** {member.mention}\n\n**Usage:**\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members."
                 await irr.response.edit_message(embed=embed,view=view)
             modal.on_submit=text_callback
             modal.add_item(text)
@@ -704,11 +763,11 @@ class VM(commands.Cog):
                 view.add_item(list)
                 member = user.guild.get_member_named(x) or user.guild.get_member(int(x))
                 if not member:
-                    embed.description = f"**0** members were unwhitelisted\n**Reason:\n**・Member not found\nClick the `List` button to see all the whitelisted members."
+                    embed.description = f"**Unwhitelisted** `0` members\n**Reason:\n**・Member not found\n\n**Usage:**\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members."
                     await ir.response.edit_message(embed=embed,view=view)
                     return
                 if not member.id in data["whitelist"]:
-                    embed.description = f"**0** members were unwhitelisted\n**Reason:\n**・The member is not whitelisted\nClick the `List` button to see all the whitelisted members."
+                    embed.description = f"**Unwhitelisted** `0` members\n**Reason:\n**・The member is not whitelisted\n\n**Usage:**\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members."
                     await ir.response.edit_message(embed=embed,view=view)
                     return
                 
@@ -719,7 +778,7 @@ class VM(commands.Cog):
                 data["whitelist"].remove(member.id)
                 await self.client.vm.replace_one({"_id":user.id},data)
                 
-                embed.description = f"**Unwhitelisted** {member.mention}\nClick the `List` button to see all the whitelisted members."
+                embed.description = f"**Unwhitelisted** {member.mention}\n\n**Usage:**\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members."
                 await irr.response.edit_message(embed=embed,view=view)
             modal.on_submit=text_callback
             modal.add_item(text)
@@ -804,7 +863,7 @@ class VM(commands.Cog):
             await self.client.vm.delete_one({"_id":user.id})
             await ir.response.edit_message(content=f"Deleted the VC",embed=None,view=view)
             
-        embed = discord.Embed(color=3092790,description="Deleting the VC info deletes all your custom settings permanently.\nClick the `Confirm` button to delete the VC.")
+        embed = discord.Embed(color=3092790,title="Delete",description="Deleting the VC info deletes all your custom settings permanently.**Usage:**\n・[`Confirm`](https://discord.gg/xesty): Click the button to delete the VC.")
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         async def on_timeout():
             view.clear_items()
