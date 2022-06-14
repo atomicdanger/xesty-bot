@@ -77,7 +77,7 @@ class VM(commands.Cog):
                         return
                     data["cooldown"]["warns"]+=1
                     if not member.premium_since:
-                        embed= discord.Embed(color=3092790,title="Cooldown",description=f"Wait <t:{cooldown}:R> before being able to make a new VC.\nBoost the server to avoid the cooldowns!")
+                        embed= discord.Embed(color=3092790,title="Cooldown",description=f"Wait <t:{int(cooldown)}:R> before being able to make a new VC.\nBoost the server to avoid the cooldowns!")
                         embed.set_author(name="Voice Master")
                         try:
                             await member.send(embed=embed)
@@ -97,6 +97,8 @@ class VM(commands.Cog):
                             return
                         else:
                             booster_c=True
+                    if not member.premium_since:
+                        return
             jtc = await self.client.fetch_channel(jvc_id)
             overwrites = {}
             overwrite = discord.PermissionOverwrite()
