@@ -384,7 +384,12 @@ class VM(commands.Cog):
             overwrite = user.voice.channel.overwrites_for(member)
             overwrite.connect=False
             await user.voice.channel.set_permissions(member,overwrite=overwrite)
+            try:
+                await member.move_to(None)
+            except:
+                pass
             return member
+            
         async def select_callback(ir):
             values = ir.data["values"]
             bans=[]
@@ -400,7 +405,7 @@ class VM(commands.Cog):
                 bans.append(member.id)
             view.clear_items()
             view.clear_items()
-            view.add_items(b_bans)
+            view.add_item(b_bans)
             if len(bans)>0:
                 embed.description = f"**Banned** `0` members\n**Reason:\n**{reason}\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
                 await ir.response.edit_message(embed=embed,view=view)
@@ -536,7 +541,7 @@ class VM(commands.Cog):
                     await user.voice.channel.set_permissions(member,overwrite=overwrite)
                 data["ban"].remove(id)
             view.clear_items()
-            view.add_items(b_bans)
+            view.add_item(b_bans)
             await self.client.vm.replace_one({"_id":user.id},data)
             embed.description = f"**Unbanned** `{len(data['values'])}` members\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
             await ir.response.edit_message(embed=embed,view=view)
