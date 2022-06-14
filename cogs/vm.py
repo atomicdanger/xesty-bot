@@ -68,6 +68,8 @@ class VM(commands.Cog):
             data = await self.client.vm.find_one({"_id":member.id})
             if data:
                 if data["channel"]:
+                    channel = await self.client.fetch_channel(data["channel"])
+                    await member.move_to(channel)
                     return
                 cooldown = data["cooldown"]["last"]+30
                 if cooldown >time.time():
@@ -862,7 +864,7 @@ class VM(commands.Cog):
             await i.response.send_message(embed=embed,ephemeral=True)
             return
         view=View()
-        button = Button(label="Confirm",custom_id="vm_delete_confirm",button=discord.ButtonStyle.green)
+        button = Button(label="Confirm",custom_id="vm_delete_confirm",style=discord.ButtonStyle.green)
         view.add_item(button)
         async def button_callback(ir):
             await user.voice.channel.delete()
