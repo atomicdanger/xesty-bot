@@ -542,7 +542,7 @@ class VM(commands.Cog):
             view.clear_items()
             view.add_item(b_bans)
             await self.client.vm.replace_one({"_id":user.id},data)
-            embed.description = f"**Unbanned** `{len(data['values'])}` members\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
+            embed.description = f"**Unbanned** `{len(ir.data['values'])}` members\n\n**Usage:**\n・[`Bans`](https://discord.gg/xesty): Click the button to see all the bans."
             await ir.response.edit_message(embed=embed,view=view)
         async def button_callback(ir): 
             modal = Modal(title="Unban")
