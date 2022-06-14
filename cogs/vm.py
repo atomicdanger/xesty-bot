@@ -538,7 +538,7 @@ class VM(commands.Cog):
                     overwrite = user.voice.channel.overwrites_for(member)
                     overwrite.connect=None
                     await user.voice.channel.set_permissions(member,overwrite=overwrite)
-                data["ban"].remove(id)
+                data["ban"].remove(int(id))
             view.clear_items()
             view.add_item(b_bans)
             await self.client.vm.replace_one({"_id":user.id},data)
