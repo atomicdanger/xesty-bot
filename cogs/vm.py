@@ -442,7 +442,7 @@ class VM(commands.Cog):
                 view.clear_items()
                 await ir.response.edit_message(content="No members are ban.",embed=None,view=view)
                 return
-            embed,pages = await self.page(ir,1,d)
+            embed,pages = await self.page(1,d)
             embed.title ="Bans"
             if pages >1:
                 embed.set_footer(text=f"1/{pages}")
@@ -479,7 +479,7 @@ class VM(commands.Cog):
                 view.clear_items()
                 await ir.response.edit_message(embed=embed,view=view)
         if len(user.voice.channel.members)>1 and len(user.voice.channel.members)<=25:
-            select = Select(custom_id="select_vmban",placeholder="Select a member to ban from the VC",max_value=len(user.voice.channel.members))
+            select = Select(custom_id="select_vmban",placeholder="Select a member to ban from the VC",max_values=len(user.voice.channel.members)-1)
             view.add_item(select)
             for member in user.voice.channel.members[:25]:
                 if not member.id == data["_id"]:
@@ -612,7 +612,7 @@ class VM(commands.Cog):
                 view.clear_items()
                 await ir.response.edit_message(embed=embed,view=view)   
         if len(data["ban"])<=25:
-            select = Select(custom_id="select_vmunban",placeholder="Select a member to unban from the VC",max_value=len(data["ban"]))
+            select = Select(custom_id="select_vmunban",placeholder="Select a member to unban from the VC",max_values=len(data["ban"]))
             view.add_item(select)
             for id in data["ban"]:
                 try:
