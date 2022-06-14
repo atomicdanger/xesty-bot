@@ -89,7 +89,7 @@ class VM(commands.Cog):
                     else:
                         booster=True
                     if data["cooldown"]["warns"]==3:
-                        ban_role= member.guild.get_role(2)
+                        ban_role= member.guild.get_role(986207873480687677)
                         await member.add_roles(ban_role)
                         if not member.premium_since:
                             await asyncio.sleep(300)
