@@ -719,9 +719,9 @@ class VM(commands.Cog):
             return
         embed=discord.Embed(color=3092790,title="Whitelist",description="[`Whitelists`](https://discord.gg/xesty) an user and lets em join even if the channels locked or ghosted.\n\n**Usage:**\n・[`Add`](https://discord.gg/xesty): Click the button to whitelist a member\n・[`Remove`](https://discord.gg/xesty): Click the button to unwhitelist a member\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members")
         view=View()
-        add=Button(label="Add",custom_="vm_whitelist_add")
-        remove=Button(label="Remove",custom_="vm_whitelist_remove")
-        wlist=Button(label="List",custom_="vmwhitelists")
+        add=Button(label="Add",custom_id="vm_whitelist_add")
+        remove=Button(label="Remove",custom_id="vm_whitelist_remove")
+        wlist=Button(label="List",custom_id="vmwhitelists")
         view.add_item(add)
         view.add_item(remove)
         view.add_item(wlist)
