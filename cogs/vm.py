@@ -727,7 +727,7 @@ class VM(commands.Cog):
             return
         embed=discord.Embed(color=3092790,title="Whitelist",description="[`Whitelists`](https://discord.gg/xesty) an user and lets em join even if the channels locked or ghosted.\n\n**Usage:**\n・[`Add`](https://discord.gg/xesty): Click the button to whitelist a member\n・[`Remove`](https://discord.gg/xesty): Click the button to unwhitelist a member\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members")
         view=View()
-        add=Button(label="Add",custom_="vm_whitelist_add")
+        add=Button(label="Add",custom_id="vm_whitelist_add")
         remove=Button(label="Remove",custom_id="vm_whitelist_remove")
         wlist=Button(label="List",custom_id="vmwhitelists")
         view.add_item(add)
@@ -871,7 +871,7 @@ class VM(commands.Cog):
             await self.client.vm.delete_one({"_id":user.id})
             await ir.response.edit_message(content=f"Deleted the VC",embed=None,view=view)
             
-        embed = discord.Embed(color=3092790,title="Delete",description="[`Deletes`](https://discord.gg/xesty) the VC and all the user settings permanently. You can still make new VCs.**Usage:**\n・[`Confirm`](https://discord.gg/xesty): Click the button to delete the VC.")
+        embed = discord.Embed(color=3092790,title="Delete",description="[`Deletes`](https://discord.gg/xesty) the VC and all the user settings permanently. You can still make new VCs.\n\n**Usage:**\n・[`Confirm`](https://discord.gg/xesty): Click the button to delete the VC.")
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         async def on_timeout():
             view.clear_items()
