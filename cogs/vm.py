@@ -30,10 +30,10 @@ class VM(commands.Cog):
             return
         if before.channel:
             b_channel = before.channel.id
-            b = await self.client.vm.find_one({"channel":b_channel.id})    
+            b = await self.client.vm.find_one({"channel":b_channel})    
         else:
             a_channel = after.channel.id
-            a = await self.client.vm.find_one({"channel":a_channel.id})     
+            a = await self.client.vm.find_one({"channel":a_channel})     
         if b and before.channel.id == b["channel"]:
             if not b["boost"]:
                 if len(before.channel.members) == 0:
@@ -75,7 +75,7 @@ class VM(commands.Cog):
                         return
                     data["cooldown"]["warns"]+=1
                     if not member.premium_since:
-                        embed= discord.Embed(title="Cooldown",description=f"Wait <t:{cooldown}:R> before being able to make a new VC.\nBoost the server to avoid the cooldowns!")
+                        embed= discord.Embed(color=3092790,title="Cooldown",description=f"Wait <t:{cooldown}:R> before being able to make a new VC.\nBoost the server to avoid the cooldowns!")
                         embed.set_author(name="Voice Master")
                         try:
                             await member.send(embed=embed)
@@ -691,7 +691,7 @@ class VM(commands.Cog):
         
         embed = discord.Embed(
             title="Activity",
-            description="[`Starts`] an activity to play with your friends in the VC (Desktop Only).\n\n**Usage:**\n・[`Dropdown Menu`](https://discord.gg/xesty): Select an activity to start from the menu",color=3092790)
+            description="[`Starts`](https://discord.gg/xesty) an activity to play with your friends in the VC (Desktop Only).\n\n**Usage:**\n・[`Dropdown Menu`](https://discord.gg/xesty): Select an activity to start from the menu",color=3092790)
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         async def on_timeout():
             view.clear_items()
@@ -717,7 +717,7 @@ class VM(commands.Cog):
             embed = discord.Embed(color=3092790,description=f"**Only owner of the voice channel ({owner.mention}) can access the feature**")
             await i.response.send_message(embed=embed,ephemeral=True)
             return
-        embed=discord.Embed(color=3092790,title="Whitelist",description="[`Whitelists] an user and lets em join even if the channels locked or ghosted.\n\n**Usage:**\n・[`Add`](https://discord.gg/xesty): Click the button to whitelist a member\n・[`Remove`](https://discord.gg/xesty): Click the button to unwhitelist a member\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members")
+        embed=discord.Embed(color=3092790,title="Whitelist",description="[`Whitelists`](https://discord.gg/xesty) an user and lets em join even if the channels locked or ghosted.\n\n**Usage:**\n・[`Add`](https://discord.gg/xesty): Click the button to whitelist a member\n・[`Remove`](https://discord.gg/xesty): Click the button to unwhitelist a member\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members")
         view=View()
         add=Button(label="Add",custom_="vm_whitelist_add")
         remove=Button(label="Remove",custom_="vm_whitelist_remove")
@@ -863,7 +863,7 @@ class VM(commands.Cog):
             await self.client.vm.delete_one({"_id":user.id})
             await ir.response.edit_message(content=f"Deleted the VC",embed=None,view=view)
             
-        embed = discord.Embed(color=3092790,title="Delete",description="Deleting the VC info deletes all your custom settings permanently.**Usage:**\n・[`Confirm`](https://discord.gg/xesty): Click the button to delete the VC.")
+        embed = discord.Embed(color=3092790,title="Delete",description="[`Deletes`](https://discord.gg/xesty) the VC and all the user settings permanently. You can still make new VCs.**Usage:**\n・[`Confirm`](https://discord.gg/xesty): Click the button to delete the VC.")
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         async def on_timeout():
             view.clear_items()
