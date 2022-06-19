@@ -75,10 +75,10 @@ class Spotify(commands.Cog):
             data["songs"]={}
             data["auth"]=None
         data["auth"]=x
-        await self.client.replace_one({"_id":"spotify"},data,True)
+        await self.db.replace_one({"_id":"spotify"},data,True)
         await ctx.send("Added the login token!")
         
-    @commands.command()
+    @song.command()
     async def add(self,ctx,url:str):
         info = await self.db.find_one({"_id":ctx.author.id})
         if not info:
