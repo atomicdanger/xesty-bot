@@ -9,6 +9,11 @@ import selenium
 import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+import webdriver_manager
+from webdriver_manager.chrome import ChromeDriverManager
+
+
 
 class Spotify(commands.Cog):
     token = os.environ['TOKEN']
@@ -35,7 +40,7 @@ class Spotify(commands.Cog):
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument("--incognito")
-            web = webdriver.Chrome(options=chrome_options)
+            web = webdriver.Chrome(ChromeDriverManager().install(),options=chrome_options)
             web.get(url)
             await asyncio.sleep(3)
             code_url =web.current_url
