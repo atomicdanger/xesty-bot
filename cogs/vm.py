@@ -35,7 +35,7 @@ class VM(commands.Cog):
             a_channel = after.channel.id
             a = await self.client.vm.find_one({"channel":a_channel})     
         if b and before.channel.id == b["channel"]:
-            if not b["boost"]:
+            if b["boost"]==False:
                 if len(before.channel.members) == 0:
                     await before.channel.delete(reason="Empty Vc")
                     b["channel"]=None
@@ -44,6 +44,9 @@ class VM(commands.Cog):
                 cooldown = b["cooldown"]["last"]+30
                 if cooldown >time.time():
                     t=cooldown-time.time()
+                    if after.channel and after.channel.id == jvc_id:
+                        await member.move_to(before.channel.id)
+                        return
                     await asyncio.sleep(t)
                     before.channel = await member.guild.fetch_channel(before.channel.id)
                 if len(before.channel.members) == 0:
@@ -77,7 +80,7 @@ class VM(commands.Cog):
                         return
                     data["cooldown"]["warns"]+=1
                     if not member.premium_since:
-                        embed= discord.Embed(color=3092790,title="Cooldown",description=f"Wait <t:{int(cooldown)}:R> before being able to make a new VC.\nBoost the server to avoid the cooldowns!")
+                        embed= discord.Embed(color=3092790,title="Cooldown",description=f"Cooldown ends <t:{int(cooldown)}:R>. Wait before being able to make a new VC.\nBoost the server to avoid the cooldowns!")
                         embed.set_author(name="Voice Master")
                         try:
                             await member.send(embed=embed)
@@ -91,6 +94,8 @@ class VM(commands.Cog):
                     if data["cooldown"]["warns"]==3:
                         ban_role= member.guild.get_role(986207873480687677)
                         await member.add_roles(ban_role)
+                        embed= discord.Embed(color=3092790,title="Cooldown",description=f"Wait <t:{int(cooldown)}:R> before being able to make a new VC.\nBoost the server to avoid the cooldowns!")
+                        
                         if not member.premium_since:
                             await asyncio.sleep(300)
                             await member.remove_roles(ban_role)
@@ -872,7 +877,7 @@ class VM(commands.Cog):
             await user.voice.channel.delete()
             await self.client.vm.delete_one({"_id":user.id})
             await ir.response.edit_message(content=f"Deleted the VC",embed=None,view=view)
-            
+        button.callback=button_callback
         embed = discord.Embed(color=3092790,title="Delete",description="[`Deletes`](https://discord.gg/xesty) the VC and all the user settings permanently. You can still make new VCs.\n\n**Usage:**\n・[`Confirm`](https://discord.gg/xesty): Click the button to delete the VC.")
         await i.response.send_message(embed=embed,view=view,ephemeral=True)
         async def on_timeout():

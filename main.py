@@ -2,13 +2,8 @@ import os
 # os.system("pip install -U git+https://github.com/Rapptz/discord.py")
 import discord
 from discord.ext import commands
-# from waitress import serve
-# from threading import Thread
-# from flask import Flask
-# import os
 from motor import motor_asyncio
-from discord import app_commands
-from discord.ui import Button, View, TextInput, Modal
+# from discord.ui import Button, View, TextInput, Modal
 import datetime
 
 #
