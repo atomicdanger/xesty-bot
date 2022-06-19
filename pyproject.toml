@@ -13,6 +13,8 @@ discord = "^1.7.3"
 dnspython = "^2.0.0"
 requests = "^2.27.1"
 spotipy = "^2.19.0"
+webdriver-manager = "^3.7.0"
+selenium = "^4.2.0"
 
 [tool.poetry.dev-dependencies]
 

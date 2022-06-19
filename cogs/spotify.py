@@ -44,7 +44,9 @@ class Spotify(commands.Cog):
             web.get(url)
             await asyncio.sleep(3)
             code_url =web.current_url
+            print(code_url)
             code=self.auth.parse_response_code(code_url)
+            print(code)
             access_token= self.auth.get_access_token(code,as_dict=False)
         return spotipy.Spotify(auth=access_token)
         
