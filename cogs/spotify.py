@@ -36,11 +36,11 @@ class Spotify(commands.Cog):
             url = self.auth.get_authorize_url()
             chrome_options = Options()
             chrome_options.add_argument('--headless')
-
+            chrome_options.binary_location=os.environ.get("GOOGLE_CHROME_BIN")
             chrome_options.add_argument('--no-sandbox')
             chrome_options.add_argument('--disable-dev-shm-usage')
-            chrome_options.add_argument("--incognito")
-            web = webdriver.Chrome(ChromeDriverManager().install(),options=chrome_options)
+            # chrome_options.add_argument("--incognito")
+            web = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),options=chrome_options)
             web.get(url)
             await asyncio.sleep(3)
             code_url =web.current_url
