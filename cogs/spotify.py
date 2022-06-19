@@ -5,13 +5,13 @@ import requests
 import spotipy
 import time
 import json
-import selenium
+# import selenium
 import os
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
-import webdriver_manager
-from webdriver_manager.chrome import ChromeDriverManager
+# from selenium import webdriver
+# from selenium.webdriver.chrome.options import Options
+# from selenium import webdriver
+# import webdriver_manager
+# from webdriver_manager.chrome import ChromeDriverManager
 
 
 
@@ -24,31 +24,59 @@ class Spotify(commands.Cog):
         self.client = client
         self.request = requests.Session()
         self.db = client.db["spotify"]
-        
         self.auth = spotipy.oauth2.SpotifyOAuth(username=os.environ["su"],scope="playlist-modify-public",client_id=os.environ["sid"],client_secret=os.environ["scs"],redirect_uri='http://localhost:8888',open_browser=False)
-        # self.sp = spotipy.Spotify(auth_manager=self.token1)
     async def backend(self):
         ti = self.auth.get_cached_token()
         if ti:
             access_token = ti['access_token']
-            print("a")
         else:
-            url = self.auth.get_authorize_url()
-            chrome_options = Options()
-            chrome_options.add_argument('--headless')
-            chrome_options.binary_location=os.environ.get("GOOGLE_CHROME_BIN")
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-dev-shm-usage')
-            # chrome_options.add_argument("--incognito")
-            web = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),options=chrome_options)
-            web.get(url)
-            await asyncio.sleep(3)
-            code_url =web.current_url
-            print(code_url)
+            data = await self.db.find_one({"_id":"spotify"})
+            if not data:
+                data ={}
+                data["songs"]={}
+                data["auth"]=None
+            try:
+                code_url=data["auth"]
+            except:
+                data["auth"]=None
             code=self.auth.parse_response_code(code_url)
-            print(code)
+            # url = self.auth.get_authorize_url()
+            # chrome_options = Options()
+            # chrome_options.add_argument('--headless')
+            # chrome_options.binary_location=os.environ.get("GOOGLE_CHROME_BIN")
+            # chrome_options.add_argument('--no-sandbox')
+            # chrome_options.add_argument('--disable-dev-shm-usage')
+            # # chrome_options.add_argument("--incognito")
+            # web = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),options=chrome_options)
+            # web.get(url)
+            # await asyncio.sleep(3)
+            # code_url =web.current_url
+            # print(code_url)
+            # code=self.auth.parse_response_code(code_url)
+            # print(code)
             access_token= self.auth.get_access_token(code,as_dict=False)
         return spotipy.Spotify(auth=access_token)
+    @commands.group(invoke_without_command=True)
+    async def song(self,ctx):
+        return
+    @song.command()
+    @commands.is_owner()
+    async def auth(self,ctx):
+        url = self.auth.get_authorize_url()
+        embed=discord.Embed(description=f"[Auth Url]({url})")
+        await ctx.send(embed=embed)
+    @song.command()
+    @commands.is_owner()
+    async def login(self,ctx,*,x:str):
+        await ctx.message.delete()
+        data = await self.db.find_one({"_id":"spotify"})
+        if not data:
+            data ={}
+            data["songs"]={}
+            data["auth"]=None
+        data["auth"]=x
+        await self.client.replace_one({"_id":"spotify"},data,True)
+        await ctx.send("Added the login token!")
         
     @commands.command()
     async def add(self,ctx,url:str):
@@ -57,19 +85,21 @@ class Spotify(commands.Cog):
             info ={}
             info["time"]=0
             info["songs"]=[]
-        if info["time"]>time.time():
+        if info["time"]+86400>time.time():
             return await ctx.send("You already have added one song today.")
         id = "spotify:track:"+url.split("track/")[1].split("?")[0]
         data = await self.db.find_one({"_id":"spotify"})
         if not data:
             data ={}
             data["songs"]={}
+            data["auth"]=None
         songs = list(data["songs"].keys())
         if id in songs:
             return await ctx.send("Song already in the playlist")
-        sp= await self.backend()
-        if not sp:
-            return await ctx.send('Something went wrong! Please contact the staff.')
+        try:
+            sp= await self.backend()
+        except:
+            return await ctx.send('Authorization failed! Contact Danger for authorization.')
         try:
             track = sp.track(id)
         except:
@@ -96,7 +126,7 @@ color= 3092790
         try:
             sp.playlist_add_items(playlist_id="14wjR1THtXs09VyGiIBJJQ",items=[id])
             info["songs"].append(song)
-            info["time"]= time.time()+86400
+            info["time"]= time.time()
             await self.db.replace_one({"_id":ctx.author.id},info,True)
             data["songs"][id]=[ctx.author.id,song]
             await self.db.replace_one({"_id":"spotify"},data,True)
