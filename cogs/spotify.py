@@ -135,18 +135,18 @@ color= 3092790
         log = ctx.guild.get_channel(974948945220485150)
         await log.send(embed=embed)
         await ctx.send("Song Added")
-    @commands.group(invoke_without_command=True)
-    @commands.is_owner()
-    async def remove(self,ctx):
-        return
-    @remove.command()
+    # @commands.group(invoke_without_command=True)
+    # @commands.is_owner()
+    # async def remove(self,ctx):
+    #     return
+    @commands.command()
     async def time(self,ctx,member:discord.Member):
         info = await self.db.find_one({"_id":ctx.author.id})
         info["time"]=0
         await self.db.replace_one({"_id":ctx.author.id},info,True)
         await ctx.send("Done")
-    @remove.command()
-    async def song(self,ctx,url:str):
+    @song.command()
+    async def remove(self,ctx,url:str):
         id = "spotify:track:"+url.split("track/")[1].split("?")[0]
         sp= await self.backend()
         if not sp:
