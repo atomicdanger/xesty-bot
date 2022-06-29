@@ -81,21 +81,23 @@ class Spotify(commands.Cog):
     @song.command()
     async def add(self,ctx,url:str):
         info = await self.db.find_one({"_id":ctx.author.id})
-        if not info:
-            info ={}
-            info["time"]=0
-            info["songs"]=[]
-        if info["time"]+86400>time.time():
-            return await ctx.send("You already have added one song today.")
-        id = "spotify:track:"+url.split("track/")[1].split("?")[0]
         data = await self.db.find_one({"_id":"spotify"})
         if not data:
             data ={}
             data["songs"]={}
+            data["delay"]=88400
             data["auth"]=None
+        if not info:
+            info ={}
+            info["cooldown"]=0
+            info["songs"]={}
+        cooldown = info["cooldown"]+data["delay"]
+        if cooldown>time.time():
+            return await ctx.send(f"You're on cooldown from adding songs. Cooldown ends <t:{cooldown}:R>")
+        id = "spotify:track:"+url.split("track/")[1].split("?")[0]
         songs = list(data["songs"].keys())
         if id in songs:
-            return await ctx.send("Song already in the playlist")
+            return await ctx.send("Song already in the playlist.")
         try:
             sp= await self.backend()
         except:
@@ -125,10 +127,10 @@ color= 3092790
         embed.set_author(name=str(ctx.author),icon_url=str(ctx.author.display_avatar))
         try:
             sp.playlist_add_items(playlist_id="14wjR1THtXs09VyGiIBJJQ",items=[id])
-            info["songs"].append(song)
-            info["time"]= time.time()
+            info["songs"][id]=[song,time.time()]
+            info["cooldown"]= time.time()
             await self.db.replace_one({"_id":ctx.author.id},info,True)
-            data["songs"][id]=[ctx.author.id,song]
+            data["songs"][id]=[ctx.author.id,song,time.time()]
             await self.db.replace_one({"_id":"spotify"},data,True)
         except:
             return await ctx.send("Something went wrong while adding the song to playlist! Contact the staff.")
