@@ -547,9 +547,7 @@ class VM(commands.Cog):
             for id in values:
                 member = ir.guild.get_member(int(id))
                 if member:
-                    overwrite = user.voice.channel.overwrites_for(member)
-                    overwrite.connect=None
-                    await user.voice.channel.set_permissions(member,overwrite=overwrite)
+                    await user.voice.channel.set_permissions(member,overwrite=None)
                 data["ban"].remove(int(id))
             view.clear_items()
             view.add_item(b_bans)
@@ -789,10 +787,7 @@ class VM(commands.Cog):
                     await ir.response.edit_message(embed=embed,view=view)
                     return
                 
-                overwrite = user.voice.channel.overwrites_for(member)
-                overwrite.connect=None
-                overwrite.view_channel=None
-                await user.voice.channel.set_permissions(member,overwrite=overwrite)
+                await user.voice.channel.set_permissions(member,overwrite=None)
                 data["whitelist"].remove(member.id)
                 await self.client.vm.replace_one({"_id":user.id},data)
                 
