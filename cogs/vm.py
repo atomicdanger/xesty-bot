@@ -746,7 +746,7 @@ class VM(commands.Cog):
             async def text_callback(irr:discord.Interaction):
                 x = text.value
                 view.clear_items()
-                view.add_item(list)
+                view.add_item(wlist)
                 member = user.guild.get_member_named(x) or user.guild.get_member(int(x))
                 if not member:
                     embed.description = f"**Whitelisted** `0` member\n**Reason:\n**・Member not found\n\n**Usage:**\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members."
@@ -775,7 +775,7 @@ class VM(commands.Cog):
             async def text_callback(irr:discord.Interaction):
                 x = text.value
                 view.clear_items()
-                view.add_item(list)
+                view.add_item(wlist)
                 member = user.guild.get_member_named(x) or user.guild.get_member(int(x))
                 if not member:
                     embed.description = f"**Unwhitelisted** `0` members\n**Reason:\n**・Member not found\n\n**Usage:**\n・[`List`](https://discord.gg/xesty): Click the button to see all the whitelisted members."
