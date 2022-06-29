@@ -875,6 +875,7 @@ class VM(commands.Cog):
         view.add_item(button)
         async def button_callback(ir):
             await user.voice.channel.delete()
+            view.clear_items()
             await self.client.vm.delete_one({"_id":user.id})
             await ir.response.edit_message(content=f"Deleted the VC",embed=None,view=view)
         button.callback=button_callback

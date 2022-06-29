@@ -42,6 +42,7 @@ class MyBot(commands.Bot):
         link = os.environ["mongodb_uri"]
         mongoClient = motor_asyncio.AsyncIOMotorClient(f"{link}")
         self.db = mongoClient['xesty']
+        self.config=self.db["config"]
         self.snipe=self.db["snipe"]
         self.vm=self.db["voicemaster"]
         for filename in os.listdir('./cogs'):
