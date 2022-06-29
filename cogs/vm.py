@@ -22,6 +22,8 @@ class VM(commands.Cog):
             await self.methods[method](i)
     @commands.Cog.listener()
     async def on_voice_state_update(self,member,before,after):
+        if member.bot:
+            return
         whitelist=[535490443681595392]
         jvc_id= 979681300220903425
         b=None
