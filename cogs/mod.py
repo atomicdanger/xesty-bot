@@ -15,7 +15,7 @@ class Moderation(commands.Cog):
     header = {"Authorization": f"Bot {token}"}
     def __init__(self, client):
         self.client = client
-        self.words=["nigga","nigger","whore","slut","retard","fag","blackie","kys"]
+        self.words=["nigga","nigger","fag","blackie","kys"]
     @commands.Cog.listener()
     async def on_message(self,message):
         if message.author.bot:
