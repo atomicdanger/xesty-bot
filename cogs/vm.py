@@ -23,6 +23,7 @@ class VM(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self,member,before,after):
         if member.bot:
+            print("a")
             return
         whitelist=[535490443681595392]
         jvc_id= 979681300220903425
@@ -592,7 +593,7 @@ class VM(commands.Cog):
                 view.clear_items()
                 await ir.response.edit_message(content="No members are ban.",embed=None,view=view)
                 return
-            embed,pages = await self.page(ir,1,d)
+            embed,pages = await self.page(1,d)
             embed.title ="Bans"
             if pages >1:
                 embed.set_footer(text=f"1/{pages}")
@@ -806,7 +807,7 @@ class VM(commands.Cog):
                 view.clear_items()
                 await ir.response.edit_message(content="No members are whitelisted.",embed=None,view=view)
                 return
-            embed,pages = await self.page(ir,1,d)
+            embed,pages = await self.page(1,d)
             embed.title ="Whitelists"
             if pages >1:
                 embed.set_footer(text=f"1/{pages}")
