@@ -32,7 +32,14 @@ class Welcome(commands.Cog):
             data["verification"]["message"]=None
         if data["verification"]["message"]:
             try:
-                m=await ctx.fetch_message(data["verification"]["message"])
+                try:
+                    if ctx.channel:
+                        channel=ctx.channel
+                    else:
+                        channel = ctx
+                except:
+                    channel=ctx
+                m=await channel.fetch_message(data["verification"]["message"])
                 await m.delete()
             except:
                 deleted=None
