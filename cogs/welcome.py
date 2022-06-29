@@ -53,11 +53,11 @@ class Welcome(commands.Cog):
         ctx = self.client.get_channel(983795336407576646)
         r = i.guild.get_role(910541065071779922)
         if r in member.roles:
-            await i.response.send_message(f"You already are verified! Visit {channel} to start chatting.",ephemeral=True)
+            await i.response.send_message(f"You already are verified! Visit {channel.mention} to start chatting.",ephemeral=True)
             return
         uv= i.guild.get_role(991537153010053120)
         await member.remove_roles(uv)
-        await i.response.send_message(f"You have been verified! Visit {channel} to start chatting.",ephemeral=True)
+        await i.response.send_message(f"You have been verified! Visit {channel.mention} to start chatting.",ephemeral=True)
         embed=discord.Embed(
             title= "Welcome to Xesty!",
             description = f'''𝙀𝙣𝙟𝙤𝙮 𝙮𝙤𝙪𝙧 𝙨𝙩𝙖𝙮 {member.mention}
@@ -81,12 +81,11 @@ color= 3092790
     async def uv(self,ctx):
         uv= ctx.guild.get_role(991537153010053120)
         channels=ctx.guild.channels
-        channels.expand(ctx.guild.categories) 
+        channels.extend(ctx.guild.categories) 
         overwrite = discord.PermissionOverwrite()
         overwrite.view_channel= False
         for channel in channels: 
             await channel.set_permissions(uv,overwrite=overwrite)
         await ctx.send("done")
-# nah I meant it has autoroles atm so need to turn that off autorole the unverified role and get an alt if you got any #yeah bet 
 async def setup(client):
     await client.add_cog(Welcome(client))
