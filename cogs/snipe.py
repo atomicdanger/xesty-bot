@@ -44,7 +44,7 @@ class Snipe(commands.Cog):
                     user = await self.client.fetch_user(message["author"])
                     embed.set_author(name=str(user),icon_url=str(user.display_avatar))
                     embed.set_footer(text=f"{index+1}/{len(channel)}")
-                    embed.description=""
+                    embed.description=""    
                     if message["content"]:
                         embed.description+=message["content"]+"\n"
                     if message["embed"]:

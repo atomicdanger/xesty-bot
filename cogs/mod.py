@@ -135,10 +135,11 @@ class Moderation(commands.Cog):
             embed.title="Failed"
             embed.description=f'Please provide an user to {ctx.command.qualified_name}.\nFormat: x!{ctx.command.qualified_name} [mention or user_id] [reason (optional)]'
             return await ctx.send(embed=embed)
-        if member.top_role >= author.top_role:
-            embed.title="Failed"
-            embed.description=f"Couldn't {ctx.command.qualified_name} the user!\nReason: The user is same or higher ranked than you in the role hierarchy."
-            return await ctx.send(embed=embed)
+        if type(member)==discord.Member:
+            if member.top_role >= author.top_role:
+                embed.title="Failed"
+                embed.description=f"Couldn't {ctx.command.qualified_name} the user!\nReason: The user is same or higher ranked than you in the role hierarchy."
+                return await ctx.send(embed=embed)
         reason = f"Banned by {author}: " + reason
         embed.set_footer(text=reason)
         logs = ctx.guild.get_channel(977873814635560980)
