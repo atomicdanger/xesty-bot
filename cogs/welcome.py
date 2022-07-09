@@ -58,11 +58,10 @@ class Welcome(commands.Cog):
         member = i.user
         channel = self.client.get_channel(955108971914620979)	
         ctx = self.client.get_channel(983795336407576646)
-        r = i.guild.get_role(910541065071779922)
-        if r in member.roles:
+        uv= i.guild.get_role(991537153010053120)
+        if not uv in member.roles:
             await i.response.send_message(f"You already are verified! Visit {channel.mention} to start chatting.",ephemeral=True)
             return
-        uv= i.guild.get_role(991537153010053120)
         await member.remove_roles(uv)
         await i.response.send_message(f"You have been verified! Visit {channel.mention} to start chatting.",ephemeral=True)
         embed=discord.Embed(
