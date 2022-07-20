@@ -34,7 +34,7 @@ class VM(commands.Cog):
         if before.channel:
             b_channel = before.channel.id
             b = await self.client.vm.find_one({"channel":b_channel})    
-        else:
+        if after.channel:
             a_channel = after.channel.id
             a = await self.client.vm.find_one({"channel":a_channel})     
         if b and before.channel.id == b["channel"]:
@@ -65,9 +65,10 @@ class VM(commands.Cog):
                 if member.id in a["ban"]:
                     await member.move_to(before.channel)
                     return
-                if a["lock"] or a["ghost"] and not member.id in a["whitelist"]:
-                    await member.move_to(before.channel)
-                    return
+                if a["lock"] or a["ghost"]:
+                    if not member.id in a["whitelist"]:
+                        await member.move_to(before.channel)
+                        return
         if after.channel and after.channel.id == jvc_id:
             booster=None
             booster_c=None
